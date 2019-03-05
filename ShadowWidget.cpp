@@ -83,11 +83,11 @@ QPropertyAnimation* ShadowWidget::posAnimation(bool show) {
 
 bool ShadowWidget::event(QEvent *e) {
 	auto type = e->type();
-	if (type == QEvent::MouseButtonPress || type == QEvent::MouseMove) {
+	if (type == QEvent::MouseButtonPress || type == QEvent::MouseMove || type == QEvent::MouseButtonRelease) {
 		static QPoint pos;//鼠标点击时窗口左上角相对屏幕偏移量
 		static bool mouseValid;//拖拽有效
 		auto event = dynamic_cast<QMouseEvent*>(e);
-		if (event->button() == Qt::LeftButton) {
+		if (event->button() == Qt::LeftButton && type == QEvent::MouseButtonPress) {
 			auto y = event->y();
 			if (y > bodyProperty.shadowWidth && y <= titleHeight) {
 				pos = event->globalPos() - this->pos();
@@ -95,8 +95,10 @@ bool ShadowWidget::event(QEvent *e) {
 			} else {
 				mouseValid = false;
 			}
-		} else if ((event->buttons() & Qt::LeftButton) && mouseValid) {
+		} else if ((event->buttons() & Qt::LeftButton) && mouseValid && type == QEvent::MouseMove) {
 			move(event->globalPos() - pos);
+		} else if (type == QEvent::MouseButtonRelease) {
+			mouseValid = false;
 		}
 	}
 
